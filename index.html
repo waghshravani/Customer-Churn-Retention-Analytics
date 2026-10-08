@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Customer Churn & Retention Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--churn:#e5484d;--ret:#12a594;--ind:#4f46e5;--sh:0 1px 2px rgba(15,23,42,.06),0 4px 14px rgba(15,23,42,.05);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--card:#141a2e;--ink:#e6eaf5;--mut:#94a3b8;--line:#243050;--sh:0 1px 2px rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--bg:#0b1020;--card:#141a2e;--ink:#e6eaf5;--mut:#94a3b8;--line:#243050;--sh:0 1px 2px rgba(0,0,0,.4)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1360px;margin:0 auto;padding:24px 20px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--ind);background:color-mix(in srgb,var(--ind) 12%,transparent);padding:4px 10px;border-radius:99px}
+h1{margin:8px 0 2px;font-size:clamp(22px,3.2vw,32px);letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:16px 18px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end;margin-bottom:18px}
+.filters label{display:block;font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+select,input[type=search]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+button,.btn{padding:9px 14px;border-radius:10px;border:1px solid var(--ind);background:var(--ind);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer}
+button.ghost,.btn.ghost{background:transparent;color:var(--ind)}
+button:disabled{opacity:.4;cursor:default}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px}
+.kpi{border-left:4px solid var(--ind);animation:up .5s both}.kpi.c{border-left-color:var(--churn)}.kpi.r{border-left-color:var(--ret)}
+.kpi span{font-size:12px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.kpi b{display:block;font-size:28px;letter-spacing:-.02em;margin-top:4px}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.full{grid-column:1/-1}
+h2{font-size:15px;margin:0 0 2px}.note{font-size:12px;color:var(--mut);margin:0 0 6px}
+.ch{width:100%;height:320px}
+.ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;padding:0;margin:10px 0 0;list-style:none}
+.ins li{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.ins em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--ind);display:block}
+.callout{margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--churn) 9%,transparent);font-size:12.5px}
+.rec{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:10px}
+.rec div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.rec h3{margin:0 0 4px;font-size:14px}.rec p{margin:0;color:var(--mut)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mut);font-size:11px;text-transform:uppercase}
+.pill{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}.p1{background:color-mix(in srgb,var(--churn) 15%,transparent);color:var(--churn)}.p0{background:color-mix(in srgb,var(--ret) 15%,transparent);color:var(--ret)}
+.tb{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}.tb input{max-width:260px}
+#empty{display:none;text-align:center;padding:40px;font-weight:600}
+main.none #empty{display:block}main.none .grid{display:none}
+#val{font-size:12px;color:var(--mut);margin-top:18px}#err{color:var(--churn);font-weight:600}
+#start{text-align:center;padding:40px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.wrap{padding:16px 12px}}
+</style></head><body><div class="wrap">
+<header><div><span class="tag">DATA ANALYST PROJECT</span><h1>Customer Churn &amp; Retention Analytics</h1>
+<p class="sub">Understanding Customer Behavior, Churn Patterns &amp; Retention Opportunities</p></div>
+<label class="btn ghost" style="cursor:pointer">Load a different CSV<input id="file" type="file" accept=".csv" hidden></label></header>
+<div id="plerr" class="card" style="display:none;text-align:center;font-weight:600;color:var(--churn);margin-bottom:16px">Unable to load the chart library. Please check your internet connection and reload the page.</div>
+<div id="start" class="card" style="display:none"><h2>Load train.csv</h2><p class="note">The dataset could not be loaded automatically (this happens when the page is opened directly from disk). Choose data/train.csv to begin. The file is read in your browser and is not uploaded anywhere.</p><label class="btn" style="cursor:pointer">Choose train.csv<input id="file2" type="file" accept=".csv" hidden></label><p id="err"></p></div>
+<div id="app" style="display:none">
+<section class="card filters" id="filters"></section>
+<section class="kpis" id="kpis"></section>
+<main id="main"><div id="empty" class="card">No customers match the selected filters.</div>
+<div class="grid">
+<div class="card"><h2>Customer Retention Overview</h2><p class="note">Retained vs churned customers</p><div class="ch" id="c_donut"></div></div>
+<div class="card"><h2>Churn Rate by Subscription Type</h2><p class="note">Sorted high to low. Dashed line = overall churn of the current selection.</p><div class="ch" id="c_sub"></div></div>
+<div class="card"><h2>Churn Rate by Location</h2><p class="note">Sorted high to low</p><div class="ch" id="c_loc"></div></div>
+<div class="card"><h2>Churn Rate by Account Age</h2><p class="note">Account_Age_Months grouped in 12-month bands</p><div class="ch" id="c_age"></div></div>
+<div class="card"><h2>Churn Rate by Spending Group</h2><p class="note">Low ≤50 · Medium ≤100 · High ≤150 · Very High ≤200</p><div class="ch" id="c_sp"></div></div>
+<div class="card"><h2>Churn Rate by Satisfaction Score</h2><p class="note">Scores 1–10. Observed differences only, not evidence of cause.</p><div class="ch" id="c_sat"></div></div>
+<div class="card"><h2>Churn Rate by Support Calls</h2><p class="note">Small groups can swing widely; check the customer counts in the tooltip.</p><div class="ch" id="c_sc"></div></div>
+<div class="card"><h2>Monthly Spending vs Total Usage</h2><p class="note">Do churned and retained customers form separate groups? Zoom and hover to check.</p><div class="ch" id="c_scat"></div></div>
+<div class="card full"><h2>Correlation with Churn</h2><p class="note">Pearson correlation of each numeric column with Churn (calculated on the current selection).</p><div class="ch" id="c_cor" style="height:380px"></div>
+<div class="callout">Correlation values are weak in this dataset and should not be interpreted as evidence of causation.</div></div>
+<div class="card full"><h2>Key Business Insights</h2><p class="note">Generated from the currently filtered data. Groups with fewer than 30 customers are ignored.</p><ul class="ins" id="ins"></ul>
+<div class="callout"><b>Observation, not causation.</b> These are observed patterns in this dataset. They do not show that any variable causes churn.</div></div>
+<div class="card full"><h2>Retention Recommendations</h2><p class="note">Based only on the observed patterns above. No future analysis below has been performed yet.</p><div class="rec" id="rec"></div></div>
+<div class="card full"><h2>Filtered Customer Table</h2><div class="tb"><input id="q" type="search" placeholder="Search any value…"><span id="pg"></span></div><div class="tw"><table id="tbl"></table></div>
+<div class="tb"><span id="cnt" class="note"></span><span><button class="ghost" id="prev">Previous</button> <button class="ghost" id="next">Next</button></span></div></div>
+</div></main>
+<div id="val"></div></div></div>
+<script>
+const RAW=null;
+const NUM=new Set(['Customer_ID','Age','Account_Age_Months','Monthly_Spending','Total_Usage_Hours','Support_Calls','Late_Payments','Streaming_Usage','Discount_Used','Satisfaction_Score','Complaint_Tickets','Promo_Opted_In','Churn']);
+const AGE=['0–12 Months','13–24 Months','25–36 Months','37–48 Months','49–60 Months'],SP=['Low','Medium','High','Very High'];
+const ageG=m=>m<=12?AGE[0]:m<=24?AGE[1]:m<=36?AGE[2]:m<=48?AGE[3]:m<=60?AGE[4]:null;
+const spG=s=>s<=0?null:s<=50?SP[0]:s<=100?SP[1]:s<=150?SP[2]:s<=200?SP[3]:null;
+const FIL=[['Gender','Gender'],['Location','Location'],['Subscription_Type','Subscription Type'],['AgeG','Account Age Group'],['SpG','Spending Group'],['Satisfaction_Score','Satisfaction Score'],['ChurnS','Churn Status'],['Promo','Promo Opted In'],['Last_Interaction_Type','Last Interaction Type']];
+const $=id=>document.getElementById(id);let D=[],F=[],page=0,ready=false,pending=null;
+const pct=x=>x==null||isNaN(x)?'—':x.toFixed(2)+'%',fmt=n=>n.toLocaleString('en-US');
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function parse(text){
+ const L=text.trim().split(/\r?\n/),h=L[0].split(',').map(s=>s.trim());
+ const need=[...NUM,'Gender','Location','Subscription_Type','Last_Interaction_Type'];
+ const miss=need.filter(c=>!h.includes(c));if(miss.length)throw new Error('Missing columns: '+miss.join(', '));
+ let missing=0;const seen=new Set();let dup=0;
+ D=L.slice(1).map(l=>{if(seen.has(l))dup++;seen.add(l);const v=l.split(',');const o={};
+  h.forEach((k,i)=>{let x=v[i];if(x===undefined||x==='')missing++;o[k]=NUM.has(k)?+x:x});
+  o.AgeG=ageG(o.Account_Age_Months);o.SpG=spG(o.Monthly_Spending);o.ChurnS=o.Churn?'Churned':'Retained';o.Promo=o.Promo_Opted_In?'Yes':'No';return o});
+ const cv=[...new Set(D.map(d=>d.Churn))].sort().join(', ');
+ $('val').innerHTML=`<b>Data check</b> · ${fmt(D.length)} rows · ${h.length} columns · ${missing} missing values · ${dup} duplicate rows · Churn values: ${cv} · Source: train.csv`;
+}
+function buildFilters(){
+ $('filters').innerHTML=FIL.map(([k,l])=>{let v=[...new Set(D.map(d=>d[k]).filter(x=>x!=null))];
+  v=k==='AgeG'?AGE.filter(a=>v.includes(a)):k==='SpG'?SP.filter(a=>v.includes(a)):v.sort((a,b)=>isNaN(a)||isNaN(b)?(''+a).localeCompare(b):a-b);
+  return `<div><label>${l}</label><select data-k="${k}"><option value="">All</option>${v.map(x=>`<option>${x}</option>`).join('')}</select></div>`}).join('')+'<div><button id="reset">RESET FILTERS</button></div>';
+ document.querySelectorAll('#filters select').forEach(s=>s.onchange=()=>{page=0;render()});
+ $('reset').onclick=()=>{document.querySelectorAll('#filters select').forEach(s=>s.value='');$('q').value='';page=0;render()};
+}
+function filtered(){const a=[...document.querySelectorAll('#filters select')].filter(s=>s.value).map(s=>[s.dataset.k,s.value]);
+ return D.filter(d=>a.every(([k,v])=>String(d[k])===v))}
+function grp(rows,key,order){const m={};rows.forEach(d=>{const k=key(d);if(k==null)return;(m[k]=m[k]||{n:0,c:0}).n++;m[k].c+=d.Churn});
+ return order.filter(k=>m[k]!=null).map(k=>({k:''+k,n:m[k].n,c:m[k].c,r:100*m[k].c/m[k].n}))}
+function corr(rows,col){const n=rows.length;if(n<3)return null;let sx=0,sy=0;rows.forEach(d=>{sx+=d[col];sy+=d.Churn});const mx=sx/n,my=sy/n;let a=0,b=0,c=0;
+ rows.forEach(d=>{const x=d[col]-mx,y=d.Churn-my;a+=x*y;b+=x*x;c+=y*y});return b===0||c===0?null:a/Math.sqrt(b*c)}
+const cfg={displayModeBar:false,responsive:true};
+function lay(o={}){const ink=css('--ink'),mut=css('--mut'),ln=css('--line');return Object.assign({paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{family:'Inter,system-ui,sans-serif',color:ink,size:12},margin:{l:50,r:20,t:10,b:50},
+ xaxis:{gridcolor:ln,zerolinecolor:ln,color:mut},yaxis:{gridcolor:ln,zerolinecolor:ln,color:mut,ticksuffix:o.horiz?'':'%'},hoverlabel:{font:{family:'Inter'}}},o)}
+function rateChart(id,g,overall,opt={}){const hz=opt.horiz,ln=opt.line;const x=g.map(a=>a.k),y=g.map(a=>+a.r.toFixed(2));
+ const tr={type:ln?'scatter':'bar',mode:'lines+markers',x:hz?y:x,y:hz?x:y,orientation:hz?'h':'v',marker:{color:css('--ind'),size:9},line:{color:css('--ind'),width:3},
+  customdata:g.map(a=>[a.n,a.c]),text:y.map(v=>v.toFixed(1)+'%'),textposition:ln?'top center':'outside',cliponaxis:false,
+  hovertemplate:'<b>%{'+(hz?'y':'x')+'}</b><br>Churn rate: %{'+(hz?'x':'y')+':.2f}%<br>Customers: %{customdata[0]:,}<br>Churned: %{customdata[1]:,}<extra></extra>'};
+ if(ln)tr.mode='lines+markers+text';
+ const mx=Math.max(...y,overall||0)*1.25||10;
+ const L=lay({horiz:hz,height:320,xaxis:{color:css('--mut'),gridcolor:css('--line'),ticksuffix:hz?'%':'',range:hz?[0,mx]:undefined,type:hz?'linear':'category',categoryorder:'array',categoryarray:hz?undefined:x,title:opt.xt},
+  yaxis:{color:css('--mut'),gridcolor:css('--line'),ticksuffix:hz?'':'%',range:hz?undefined:[0,mx],type:hz?'category':'linear',autorange:hz?'reversed':undefined},
+  shapes:overall==null?[]:[{type:'line',xref:hz?'x':'paper',yref:hz?'paper':'y',x0:hz?overall:0,x1:hz?overall:1,y0:hz?0:overall,y1:hz?1:overall,line:{color:css('--churn'),width:1.5,dash:'dash'}}]});
+ if(hz)L.margin.l=90;Plotly.react(id,[tr],L,cfg)}
+
+function render(){
+ F=filtered();const n=F.length;$('main').classList.toggle('none',n===0);
+ const ch=F.reduce((s,d)=>s+d.Churn,0),rt=n-ch,rate=n?100*ch/n:null,sp=n?F.reduce((s,d)=>s+d.Monthly_Spending,0)/n:null,sat=n?F.reduce((s,d)=>s+d.Satisfaction_Score,0)/n:null;
+ $('kpis').innerHTML=[['Total Customers',n?fmt(n):'0',''],['Churned Customers',fmt(ch),'c'],['Retained Customers',fmt(rt),'r'],['Overall Churn Rate',pct(rate),'c'],['Avg Monthly Spending',sp==null?'—':'$'+sp.toFixed(2),''],['Avg Satisfaction Score',sat==null?'—':sat.toFixed(2),'']]
+  .map(([a,b,c])=>`<div class="card kpi ${c}"><span>${a}</span><b>${b}</b></div>`).join('');
+ if(!n){$('cnt').textContent='';return}
+ Plotly.react('c_donut',[{type:'pie',hole:.62,labels:['Retained','Churned'],values:[rt,ch],marker:{colors:[css('--ret'),css('--churn')]},textinfo:'label+percent',sort:false,
+  hovertemplate:'<b>%{label}</b><br>%{value:,} customers<br>%{percent}<extra></extra>'}],lay({showlegend:false,margin:{l:10,r:10,t:10,b:10},annotations:[{text:`<b>${fmt(n)}</b><br>customers`,showarrow:false,font:{size:15,color:css('--ink')}}]}),cfg);
+ const sorted=g=>g.slice().sort((a,b)=>b.r-a.r);
+ const gSub=grp(F,d=>d.Subscription_Type,['Basic','Premium','Enterprise']),gLoc=grp(F,d=>d.Location,[...new Set(D.map(d=>d.Location))]),gAge=grp(F,d=>d.AgeG,AGE),
+  gSp=grp(F,d=>d.SpG,SP),gSat=grp(F,d=>d.Satisfaction_Score,[1,2,3,4,5,6,7,8,9,10]),gSc=grp(F,d=>d.Support_Calls,[0,1,2,3,4,5,6,7,8,9]);
+ rateChart('c_sub',sorted(gSub),rate);rateChart('c_loc',sorted(gLoc),rate,{horiz:1});rateChart('c_age',gAge,rate,{line:1});
+ rateChart('c_sp',gSp,rate);rateChart('c_sat',gSat,rate,{xt:'Satisfaction score'});rateChart('c_sc',gSc,rate,{xt:'Support calls'});
+ const mk=(v,nm,col)=>{const r=F.filter(d=>d.Churn===v);return{type:'scattergl',mode:'markers',name:nm,x:r.map(d=>d.Monthly_Spending),y:r.map(d=>d.Total_Usage_Hours),marker:{color:col,size:5,opacity:.45},
+  customdata:r.map(d=>[d.Customer_ID,d.Subscription_Type,d.Location]),hovertemplate:'<b>Customer %{customdata[0]}</b><br>Spending: $%{x:.2f}<br>Usage: %{y} hrs<br>'+nm+'<br>%{customdata[1]} · %{customdata[2]}<extra></extra>'}};
+ Plotly.react('c_scat',[mk(0,'Retained',css('--ret')),mk(1,'Churned',css('--churn'))],lay({xaxis:{title:'Monthly spending ($)',gridcolor:css('--line'),color:css('--mut')},yaxis:{title:'Total usage (hours)',gridcolor:css('--line'),color:css('--mut')},legend:{orientation:'h',y:1.08}}),cfg);
+ const cols=[...NUM].filter(c=>c!=='Churn'),cr=cols.map(c=>({c,v:corr(F,c)})).filter(o=>o.v!=null).sort((a,b)=>b.v-a.v);
+ Plotly.react('c_cor',[{type:'bar',orientation:'h',x:cr.map(o=>+o.v.toFixed(4)),y:cr.map(o=>o.c),marker:{color:cr.map(o=>o.v>=0?css('--ind'):css('--churn'))},text:cr.map(o=>o.v.toFixed(4)),textposition:'outside',cliponaxis:false,
+  hovertemplate:'<b>%{y}</b><br>r = %{x:.4f}<extra></extra>'}],lay({margin:{l:140,r:50,t:10,b:40},xaxis:{range:[-1,1],zeroline:true,gridcolor:css('--line'),color:css('--mut'),title:'Correlation with Churn (−1 to 1)'},yaxis:{autorange:'reversed',color:css('--mut')}}),cfg);
+ insights({n,rate,gSub,gLoc,gAge,gSp,gSat,gSc,cr});table();
+}
+function insights(s){const ok=g=>g.filter(a=>a.n>=30),hi=g=>ok(g).slice().sort((a,b)=>b.r-a.r),lo=g=>ok(g).slice().sort((a,b)=>a.r-b.r),I=[];
+ const add=t=>I.push(t);
+ add(`Overall churn in this selection is ${pct(s.rate)} across ${fmt(s.n)} customers${s.rate>0&&s.rate<100?`, roughly 1 in ${Math.round(100/s.rate)} customers`:''}.`);
+ let g=hi(s.gLoc);if(g.length>1){add(`${g[0].k} shows the highest observed location-level churn at ${pct(g[0].r)}.`);const l=lo(s.gLoc)[0];add(`${l.k} shows the lowest observed location-level churn at ${pct(l.r)}.`)}
+ g=hi(s.gAge);if(g.length>1)add(`The ${g[0].k} account-age group shows relatively higher churn (${pct(g[0].r)}), followed by ${g[1].k} (${pct(g[1].r)}).`);
+ g=hi(s.gSp);if(g.length>1)add(`The ${g[0].k} spending group has the highest observed churn (${pct(g[0].r)}); the lowest is ${lo(s.gSp)[0].k} (${pct(lo(s.gSp)[0].r)}).`);
+ g=hi(s.gSat);if(g.length>1)add(`Satisfaction score ${g[0].k} has the highest observed churn among scores (${pct(g[0].r)}).`);
+ g=hi(s.gSc);if(g.length>1)add(`Support-call count ${g[0].k} shows ${pct(g[0].r)} churn, the highest among call counts with 30+ customers.`);
+ g=ok(s.gSub);if(g.length>1){const a=Math.max(...g.map(x=>x.r))-Math.min(...g.map(x=>x.r));add(`Subscription types differ by ${a.toFixed(2)} percentage points in churn rate${a<2?', so they are very similar':''}.`)}
+ if(s.cr.length){const m=s.cr.slice().sort((a,b)=>Math.abs(b.v)-Math.abs(a.v))[0];add(`The strongest correlation with churn is ${m.c} (r = ${m.v.toFixed(4)})${Math.abs(m.v)<.1?', which is extremely weak':''}.`)}
+ $('ins').innerHTML=I.map(t=>`<li><em>OBSERVATION</em>${t}</li>`).join('');
+ const hl=hi(s.gLoc),ll=lo(s.gLoc),ha=hi(s.gAge),hs=hi(s.gSc);
+ const R=[['Focus on mid-lifecycle customers',ha.length>1?`The ${ha[0].k} and ${ha[1].k} groups show relatively higher churn in this selection. Monitor them and investigate whether targeted retention initiatives are appropriate.`:'Compare account-age groups once more than one group is in the selection.'],
+ ['Investigate geographic differences',hl.length>1?`${hl[0].k} shows relatively higher churn than ${ll[0].k}. Investigate whether pricing, service, competition, engagement or customer behavior may explain the variation.`:'Select more than one location to compare geographic differences.'],
+ ['Investigate support interactions',hs.length>1?`Support-call count ${hs[0].k} shows higher observed churn. Analyze the nature and outcome of support interactions before concluding why this occurs.`:'Not enough support-call groups in this selection to compare.'],
+ ['Segment retention campaigns','Use combinations of location, subscription, account age, spending and engagement rather than applying the same retention strategy to everyone.'],
+ ['Conduct deeper analysis','Future work (not yet performed): customer segmentation, classification models, feature importance, cohort analysis and survival analysis.']];
+ $('rec').innerHTML=R.map(([a,b])=>`<div><h3>${a}</h3><p>${b}</p></div>`).join('')}
+const TC=['Customer_ID','Age','Gender','Location','Subscription_Type','Account_Age_Months','Monthly_Spending','Total_Usage_Hours','Support_Calls','Satisfaction_Score','Churn'];
+function table(){const q=$('q').value.toLowerCase().trim();const R=q?F.filter(d=>TC.some(c=>String(c==='Churn'?d.ChurnS:d[c]).toLowerCase().includes(q))):F;
+ const P=10,pages=Math.max(1,Math.ceil(R.length/P));page=Math.min(page,pages-1);const rows=R.slice(page*P,page*P+P);
+ $('tbl').innerHTML='<tr>'+TC.map(c=>`<th>${c.replace(/_/g,' ')}</th>`).join('')+'</tr>'+(rows.length?rows.map(d=>'<tr>'+TC.map(c=>c==='Churn'?`<td><span class="pill p${d.Churn}">${d.ChurnS}</span></td>`:`<td>${c==='Monthly_Spending'?d[c].toFixed(2):d[c]}</td>`).join('')+'</tr>').join(''):`<tr><td colspan="${TC.length}">No matching customers.</td></tr>`);
+ $('cnt').textContent=`${fmt(R.length)} customers · page ${page+1} of ${pages}`;$('prev').disabled=page===0;$('next').disabled=page>=pages-1}
+$('q').oninput=()=>{page=0;table()};$('prev').onclick=()=>{page--;table()};$('next').onclick=()=>{page++;table()};
+function start(text){try{parse(text);$('start').style.display='none';$('app').style.display='block';buildFilters();render()}catch(e){$('start').style.display='block';$('err').textContent=e.message}}
+function readFile(f){if(f){const r=new FileReader();r.onload=()=>ready?start(r.result):(pending=r.result);r.readAsText(f)}}
+$('file').onchange=e=>readFile(e.target.files[0]);$('file2').onchange=e=>readFile(e.target.files[0]);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>D.length&&render());
+const PL=['https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js','https://unpkg.com/plotly.js-dist-min@2.35.2/plotly.min.js'];
+function loadPlotly(i){return new Promise((res,rej)=>{
+ if(window.Plotly)return res();if(i>=PL.length)return rej();
+ const s=document.createElement('script');let done=false;
+ const next=()=>{if(done)return;done=true;clearTimeout(t);s.remove();loadPlotly(i+1).then(res,rej)};
+ const t=setTimeout(next,15000);
+ s.onload=()=>{if(done)return;if(window.Plotly){done=true;clearTimeout(t);res()}else next()};
+ s.onerror=next;s.src=PL[i];document.head.appendChild(s)})}
+function tryLoad(paths){const p=paths.shift();if(!p){$('start').style.display='block';return}
+ fetch(p).then(r=>{if(!r.ok)throw 0;return r.text()}).then(start).catch(()=>tryLoad(paths))}
+loadPlotly(0).then(()=>{ready=true;
+ if(RAW)start(RAW);else if(pending)start(pending);
+ else tryLoad(['../data/train.csv','train.csv','data/train.csv'])
+}).catch(()=>{$('plerr').style.display='block'});
+</script></body></html>
